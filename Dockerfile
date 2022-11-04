@@ -1,7 +1,8 @@
-FROM eclipse-temurin:11-jdk-alpine
+FROM eclipse-temurin:11-jdk-jammy
 
 # Build time arguments
-ARG version=10.0.0
+ARG version=9.8.0
+ARG edition=-ee
 
 ENV GRAPHDB_PARENT_DIR=/opt/graphdb
 ENV GRAPHDB_HOME=${GRAPHDB_PARENT_DIR}/home
@@ -10,15 +11,15 @@ ENV GRAPHDB_INSTALL_DIR=${GRAPHDB_PARENT_DIR}/dist
 
 WORKDIR /tmp
 
-RUN apk add --no-cache bash curl util-linux procps net-tools busybox-extras wget less libc6-compat && \
-    curl -fsSL "https://maven.ontotext.com/repository/owlim-releases/com/ontotext/graphdb/graphdb/${version}/graphdb-${version}-dist.zip" > \
+RUN apt-get update && apt-get install -y bash curl util-linux procps net-tools wget less unzip && \
+    curl -fsSL "https://maven.ontotext.com/repository/owlim-releases/com/ontotext/graphdb/graphdb${edition}/${version}/graphdb${edition}-${version}-dist.zip" > \
     graphdb-${version}.zip && \
-    bash -c 'md5sum -c - <<<"$(curl -fsSL https://maven.ontotext.com/repository/owlim-releases/com/ontotext/graphdb/graphdb/${version}/graphdb-${version}-dist.zip.md5)  graphdb-${version}.zip"' && \
+    bash -c 'md5sum -c - <<<"$(curl -fsSL https://maven.ontotext.com/repository/owlim-releases/com/ontotext/graphdb/graphdb${edition}/${version}/graphdb${edition}-${version}-dist.zip.md5)  graphdb-${version}.zip"' && \
     mkdir -p ${GRAPHDB_PARENT_DIR} && \
     cd ${GRAPHDB_PARENT_DIR} && \
     unzip /tmp/graphdb-${version}.zip && \
     rm /tmp/graphdb-${version}.zip && \
-    mv graphdb-${version} dist && \
+    mv graphdb${edition}-${version} dist && \
     mkdir -p ${GRAPHDB_HOME} && \
     ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
 
